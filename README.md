@@ -2,6 +2,15 @@
 
 A modular Python project that retrieves external public data, restructures heterogeneous source records into a standardized internal schema, engineers reusable analytical metrics, and delivers the results through a structured Streamlit workflow.
 
+<p align="center">
+  <img src="figures/10k_workflow.png" alt="Workflow overview" width="800">
+</p>
+
+<p align="center">
+  <em>Figure 1. End-to-end workflow for external financial source data (10K).</em>
+</p>
+
+
 ## Overview
 
 This project was developed as an end-to-end data workflow built on external financial source data.  
