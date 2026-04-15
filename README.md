@@ -1,150 +1,107 @@
-# External Data Pipeline and Analytical Delivery App
+# Multi-Source Financial Data Dashboard
 
-A modular Python project that retrieves external public data, restructures heterogeneous source records into a standardized internal schema, engineers reusable analytical metrics, and delivers the results through a structured Streamlit workflow.
+A layered financial data workflow that combines SEC filing data and market-linked data, converts them into normalized annual snapshots, derives reusable KPI layers, generates structured diagnostic insights, and preserves the results in a queryable SQLite database.
 
-<p align="center">
-  <img src="figures/10k_workflow.png" alt="Workflow overview" width="800">
-</p>
+## What This Project Does
 
-<p align="center">
-  <em>Figure 1. End-to-end workflow for external financial source data (10K).</em>
-</p>
+This project is not only a dashboard.  
+It is an end-to-end workflow for turning fragmented financial records into structured analytical outputs.
 
+The workflow:
+1. retrieves filing-based financial data from SEC sources,
+2. normalizes those records into year-level financial snapshots,
+3. derives comparable KPI and price-linked metrics,
+4. reorganizes those results into structured insights and controlled narrative inputs,
+5. and stores the outputs in exportable and queryable formats.
 
-## Overview
+The goal is not to generate investment recommendations.  
+The goal is to build a structured review workflow that makes raw financial records easier to inspect, compare, interpret, and reuse.
 
-This project was developed as an end-to-end data workflow built on external financial source data.  
-The primary objective was not domain-specific financial commentary, but the design of a reusable analytical pipeline that can:
+## Workflow Structure
 
-- ingest raw data from multiple external sources
-- standardize semi-structured records into a stable internal model
-- transform normalized records into derived analytical features
-- deliver outputs through an ordered application interface
-- support downstream interpretation through rule-based and AI-assisted layers
+### 1. Source Integration
+SEC filing data is converted into normalized annual snapshots.  
+Each snapshot preserves not only financial values, but also source traceability and coverage metadata so downstream layers do not depend directly on raw filing responses.
 
-Although the input domain is financial data, the technical focus of the project is data ingestion, schema design, transformation logic, modular workflow construction, and analytical output delivery.
+### 2. Metric Engineering
+Normalized snapshots are transformed into reusable KPI layers, including:
+- long-term growth metrics such as Revenue CAGR, Net Income CAGR, FCF CAGR, EPS CAGR, and BVPS CAGR
+- margin trends
+- cash-conversion and balance-sheet indicators
+- year-over-year change metrics
 
-## Problem Framing
+This layer also preserves calculation metadata and validity flags so missing or structurally weak values are not treated as ordinary outputs.
 
-External source data is often difficult to use directly in repeated analytical workflows.  
-Raw records may be fragmented across sources, inconsistent in structure, and not immediately suitable for comparison, metric computation, or review-oriented presentation.
+### 3. Interpretation Layer
+Derived metrics are reorganized into:
+- structured diagnostic insights
+- threshold-based summaries
+- controlled narrative input blocks
 
-This project addresses that problem by building a workflow that separates the pipeline into distinct layers:
+This layer separates raw calculation from interpretation so outputs remain easier to review, sort, export, and reuse.
 
-**External Retrieval → Internal Schema → Metric Engineering → Application Delivery → Interpretation Layer**
+### 4. Delivery Layer
+Final outputs are preserved in multiple forms:
+- normalized snapshot tables
+- KPI summary tables
+- structured insight tables
+- SQLite records for later querying and inspection
 
-This structure was designed so that source-specific complexity remains isolated from downstream analysis and presentation logic.
+## Key Features
 
-## Core Workflow
+- SEC filing snapshot normalization
+- market-linked price integration
+- long-term and recent-change KPI computation
+- price-linked context metrics
+- structured insight generation with evidence and risk notes
+- controlled narrative input construction
+- exportable tabular outputs
+- SQLite-based persistence and query support
 
-### 1. External Retrieval
-The pipeline retrieves data from public external sources and collects raw records needed for analysis.
+## Repository Structure
 
-### 2. Internal Schema
-Retrieved source values are reorganized into standardized annual `FinancialSnapshot` records so that later processing does not depend directly on raw source responses.
+```text
+app.py
+core/
+├── multi_10k_fetcher.py   # SEC retrieval and annual snapshot construction
+├── cagr_analysis.py       # KPI engineering and year-over-year logic
+├── valuation.py           # price-linked metrics and threshold summaries
+├── insight_engine.py      # structured diagnostic insight generation
+├── ai_analysis.py         # controlled narrative prompt construction
+├── marketstack.py         # latest market price retrieval
+└── sql_store.py           # SQLite schema, persistence, and query helpers
+```
 
-### 3. Metric Engineering
-The pipeline computes reusable analytical features from normalized records, including:
+## Main Outputs
 
-- growth metrics
-- profitability metrics
-- cash flow quality metrics
-- financial condition metrics
-- valuation-related metrics
+The workflow produces several reusable outputs:
 
-### 4. Application Delivery
-Outputs are presented through a Streamlit application in a structured order rather than as a flat metric dump.
+- **Normalized annual snapshots**  
+  Year-level financial records with source and coverage metadata.
 
-### 5. Interpretation Layer
-Rule-based signals and AI-assisted summaries are added on top of structured quantitative outputs to support faster review and interpretation.
+- **KPI summary tables**  
+  Growth, profitability, cash-conversion, balance-sheet, and recent-change metrics.
 
-## Technical Focus
+- **Structured insights**  
+  Priority-sorted diagnostic objects with status, summary, evidence, and risk notes.
 
-This project emphasizes the following technical capabilities:
+- **Narrative input blocks**  
+  Controlled prompt-ready inputs built from the current metric state.
 
-- external data ingestion from public sources
-- schema design for semi-structured records
-- reusable transformation logic built on normalized data
-- modular metric computation across separate components
-- structured output delivery through an application interface
-- interpretation support layered on top of processed analytical results
-
-## Why This Structure Matters
-
-The main value of the project lies in the way raw external data is converted into a repeatable analytical workflow.
-
-This structure supports:
-
-- clearer separation between source retrieval and downstream logic
-- easier extension of the pipeline to additional metrics or output layers
-- more consistent review of multi-year records
-- better reuse of the same workflow across different input domains with similar structural problems
-
-For that reason, the project is best understood as a data pipeline and analytical delivery system rather than as a finance-only application.
-
-## Project Structure
-
-    .
-    ├── app.py
-    ├── ai_analysis.py
-    ├── cagr_analysis.py
-    ├── marketstack.py
-    ├── multi_10k_fetcher.py
-    ├── valuation.py
-    └── notebooks/
-
-## Module Roles
-
-- **`multi_10k_fetcher.py`**  
-  Handles external retrieval from SEC company facts, ticker mapping, and annual snapshot construction.
-
-- **`marketstack.py`**  
-  Retrieves market price context used in later analytical steps.
-
-- **`cagr_analysis.py`**  
-  Computes growth, profitability, cash flow quality, and financial condition metrics from standardized annual records.
-
-- **`valuation.py`**  
-  Computes per-share and valuation-related outputs from the latest normalized snapshot.
-
-- **`ai_analysis.py`**  
-  Converts structured analytical outputs into interpretation-ready prompts and generates AI-assisted summaries.
-
-- **`app.py`**  
-  Integrates the full workflow into a Streamlit-based analytical interface.
-
-## What This Project Demonstrates
-
-This repository demonstrates the ability to:
-
-- build a modular workflow on top of external data sources
-- convert raw source records into a stable internal schema
-- design reusable metric logic from normalized records
-- organize analytical outputs into a review-friendly interface
-- connect structured quantitative processing to higher-level interpretation
-
-These capabilities are directly relevant to data-focused roles that require data integration, transformation, workflow design, and application-layer delivery.
-
-## Validation Perspective
-
-One of the main lessons from this project was that clean outputs do not automatically guarantee trustworthy meaning.
-
-Key analytical considerations include:
-
-- alignment of retrieved records across years
-- reliability of source-to-schema field mapping
-- comparability of records across time
-- careful interpretation of incomplete or ambiguous source values
-
-This perspective influenced both the project structure and the documented improvement directions.
-
-## Tech Stack
-
-- Python
-- Pandas
-- Streamlit
-- Requests
+- **SQLite tables**  
+  Persisted outputs for later querying and inspection:
+  - `analysis_runs`
+  - `snapshots`
+  - `kpi_metrics`
+  - `insights`
 
 ## Run
 
-    streamlit run app.py
+```bash
+streamlit run app.py
+```
+
+Then provide:
+- a ticker
+- a Marketstack API key
+- the number of recent 10-K snapshots to retrieve
