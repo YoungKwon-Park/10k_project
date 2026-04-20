@@ -1,107 +1,136 @@
-# Multi-Source Financial Data Dashboard
+# Multi-Source Data Integration and Quality Management Pipeline
 
-A layered financial data workflow that combines SEC filing data and market-linked data, converts them into normalized annual snapshots, derives reusable KPI layers, generates structured diagnostic insights, and preserves the results in a queryable SQLite database.
+An end-to-end data pipeline that collects heterogeneous data from external public APIs, validates field-level integrity, converts records into a normalized internal schema, and delivers reusable KPI layers and structured insights through a review-oriented interface.
 
-## What This Project Does
+---
 
-This project is not only a dashboard.  
-It is an end-to-end workflow for turning fragmented financial records into structured analytical outputs.
+## Background
 
-The workflow:
-1. retrieves filing-based financial data from SEC sources,
-2. normalizes those records into year-level financial snapshots,
-3. derives comparable KPI and price-linked metrics,
-4. reorganizes those results into structured insights and controlled narrative inputs,
-5. and stores the outputs in exportable and queryable formats.
+Data retrieved from external public sources often carries inconsistent field names, varying coverage, and structurally unstable formats across reporting periods.  
+Building analysis directly on top of raw API responses creates the following problems:
 
-The goal is not to generate investment recommendations.  
-The goal is to build a structured review workflow that makes raw financial records easier to inspect, compare, interpret, and reuse.
+- Downstream calculation logic breaks whenever source formatting changes
+- Missing fields and non-calculable metrics become indistinguishable from actual poor performance
+- The same analytical workflow cannot be reliably reapplied to new targets
 
-## Workflow Structure
+This project addresses these problems structurally by separating retrieval, normalization, metric computation, interpretation, and delivery into independent layers.
 
-### 1. Source Integration
-SEC filing data is converted into normalized annual snapshots.  
-Each snapshot preserves not only financial values, but also source traceability and coverage metadata so downstream layers do not depend directly on raw filing responses.
+---
 
-### 2. Metric Engineering
-Normalized snapshots are transformed into reusable KPI layers, including:
-- long-term growth metrics such as Revenue CAGR, Net Income CAGR, FCF CAGR, EPS CAGR, and BVPS CAGR
-- margin trends
-- cash-conversion and balance-sheet indicators
-- year-over-year change metrics
+## Pipeline Structure
 
-This layer also preserves calculation metadata and validity flags so missing or structurally weak values are not treated as ordinary outputs.
+```
+External API Retrieval
+        ↓
+Internal Schema Normalization  ←  field mapping / integrity validation / coverage tracking
+        ↓
+KPI Layer Computation          ←  calculation validity metadata included
+        ↓
+Interpretation Layer           ←  structured insights / threshold summaries / AI input construction
+        ↓
+Delivery Layer                 ←  dashboard / CSV export / SQLite storage / SQL query interface
+```
 
-### 3. Interpretation Layer
-Derived metrics are reorganized into:
-- structured diagnostic insights
-- threshold-based summaries
-- controlled narrative input blocks
+Each layer operates independently, so changes to the data source or additions to the metric set do not cascade across the entire workflow.
 
-This layer separates raw calculation from interpretation so outputs remain easier to review, sort, export, and reuse.
-
-### 4. Delivery Layer
-Final outputs are preserved in multiple forms:
-- normalized snapshot tables
-- KPI summary tables
-- structured insight tables
-- SQLite records for later querying and inspection
+---
 
 ## Key Features
 
-- SEC filing snapshot normalization
-- market-linked price integration
-- long-term and recent-change KPI computation
-- price-linked context metrics
-- structured insight generation with evidence and risk notes
-- controlled narrative input construction
-- exportable tabular outputs
-- SQLite-based persistence and query support
+### Data Integration and Integrity Management
+- Collects multi-year records from a public external API (SEC XBRL)
+- Searches multiple candidate tags in priority order to maximize field coverage for each concept
+- Preserves field-level source traceability: which tag produced which value is stored as metadata
+- Tracks available field count, missing field count, and minimum validity status per snapshot
+- Filters out records that fail the minimum validity condition before they enter downstream layers
+
+### Metric Computation and Validity Flagging
+- Computes long-term growth rates (CAGR), margin trends, cash conversion ratios, and balance-sheet safety indicators
+- Stores `calculable` flag, comparison window, and failure reason as metadata for every metric
+- Separates non-calculable cases from actual weak performance so downstream layers can handle each correctly
+- Maintains year-over-year (YoY) change rates independently from long-term CAGR to track short-term direction separately
+
+### Interpretation Layer and Visualization Planning
+- Converts quantitative metrics into nine structured diagnostic insight objects (key / category / status / summary / evidence / risk_note / priority)
+- Generates threshold-based summary messages for quick scanning of metric states
+- Produces four Altair-based chart types: absolute trend, per-share trend, margin trend, and price-linked indicators
+- Includes a prompt builder that assembles a controlled analytical block as structured input for AI-based narrative generation
+
+### Data Operations and Delivery
+- Exports analysis results as three separate CSVs: normalized snapshots, KPI summary, and structured insights
+- Persists results in a four-table SQLite schema with cumulative run tracking (analysis_runs / snapshots / kpi_metrics / insights)
+- Exposes sample SQL queries that can be executed directly inside the application to inspect stored results
+- Supports Korean and English dual-language interface
+
+---
+
+## Data Coverage and Reliability Reporting
+
+This pipeline does not expose only final output values.  
+Each analysis run also surfaces the following reliability information so that the scope of interpretation remains explicit:
+
+| Item | Description |
+|---|---|
+| Field-level coverage ratio | Proportion of collected years in which a given field is present |
+| Calculability flag | Whether each KPI was actually computable from the available data |
+| Calculation failure reason | e.g. missing_start_or_end, non_positive_year_span |
+| Minimum validity status | Whether a given annual record meets the threshold for downstream use |
+
+---
 
 ## Repository Structure
 
-```text
-app.py
+```
+app.py                          # Streamlit main application
 core/
-├── multi_10k_fetcher.py   # SEC retrieval and annual snapshot construction
-├── cagr_analysis.py       # KPI engineering and year-over-year logic
-├── valuation.py           # price-linked metrics and threshold summaries
-├── insight_engine.py      # structured diagnostic insight generation
-├── ai_analysis.py         # controlled narrative prompt construction
-├── marketstack.py         # latest market price retrieval
-└── sql_store.py           # SQLite schema, persistence, and query helpers
+├── multi_10k_fetcher.py        # External API retrieval and internal schema construction
+├── cagr_analysis.py            # KPI computation and calculation validity metadata
+├── valuation.py                # Price-linked derived metric computation
+├── insight_engine.py           # Structured diagnostic insight generation
+├── ai_analysis.py              # Analytical prompt construction and AI call
+├── marketstack.py              # Latest market price retrieval
+└── sql_store.py                # SQLite schema, persistence, and query helpers
+notebooks/
+├── 0_Project_Overview.ipynb
+├── 1_Source_Integration_and_Internal_Schema.ipynb
+├── 2_Metric_Engineering_and_Calculation_Validity_Logic.ipynb
+├── 3_Interpretation_Layer.ipynb
+└── 4_Delivery_Layer_and_Reliability_Perspective.ipynb
 ```
 
-## Main Outputs
+---
 
-The workflow produces several reusable outputs:
+## Deliverables
 
-- **Normalized annual snapshots**  
-  Year-level financial records with source and coverage metadata.
+| Output | Description |
+|---|---|
+| Normalized annual snapshots | Standardized records with source traceability metadata |
+| KPI summary table | Growth / profitability / cash conversion / balance-sheet indicators with validity flags |
+| Structured insights | Priority-sorted diagnostic objects (status / summary / evidence / risk note) |
+| AI input block | Controlled analytical prompt assembled from the current metric state |
+| SQLite tables | Layer-separated analysis history for later querying and inspection |
 
-- **KPI summary tables**  
-  Growth, profitability, cash-conversion, balance-sheet, and recent-change metrics.
+---
 
-- **Structured insights**  
-  Priority-sorted diagnostic objects with status, summary, evidence, and risk notes.
-
-- **Narrative input blocks**  
-  Controlled prompt-ready inputs built from the current metric state.
-
-- **SQLite tables**  
-  Persisted outputs for later querying and inspection:
-  - `analysis_runs`
-  - `snapshots`
-  - `kpi_metrics`
-  - `insights`
-
-## Run
+## How to Run
 
 ```bash
 streamlit run app.py
 ```
 
-Then provide:
-- a ticker
-- a Marketstack API key
-- the number of recent 10-K snapshots to retrieve
+Required inputs:
+- Ticker symbol (e.g. AAPL, MSFT)
+- Marketstack API key
+- Number of years to collect
+
+---
+
+## Tech Stack
+
+| Category | Technology |
+|---|---|
+| Data retrieval | SEC EDGAR XBRL API, Marketstack API |
+| Data processing | Python, Pandas |
+| Visualization | Altair, Streamlit |
+| Storage | SQLite |
+| AI integration | Google Gemini API |
