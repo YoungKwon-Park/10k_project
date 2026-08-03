@@ -114,8 +114,9 @@ notebooks/
 
 ---
 
-## How to Run
+## Local Application Execution
 
+The complete application is currently operated in a local environment and is not included in this documentation repository.
 ```bash
 streamlit run app.py
 ```
