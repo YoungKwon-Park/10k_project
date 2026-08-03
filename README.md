@@ -80,6 +80,9 @@ Each analysis run also surfaces the following reliability information so that th
 
 ## Local Application Structure
 
+This repository focuses on documenting the project workflow,
+design decisions, and implementation process through notebooks.
+The complete Streamlit application and core modules are maintained locally.
 ```
 app.py                          # Streamlit main application
 core/
@@ -96,12 +99,7 @@ notebooks/
 ├── 2_Metric_Engineering_and_Calculation_Validity_Logic.ipynb
 ├── 3_Interpretation_Layer.ipynb
 └── 4_Delivery_Layer_and_Reliability_Perspective.ipynb
-
-This repository focuses on documenting the project workflow,
-design decisions, and implementation process through notebooks.
-The complete Streamlit application and core modules are maintained locally.
 ```
-
 ---
 
 ## Deliverables
